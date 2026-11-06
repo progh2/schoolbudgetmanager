@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+# 설계 근거: docs/ARCHITECTURE.md §7
+# 최초 1회: Settings → Pages → Source를 "GitHub Actions"로.
+# package.json이 생기기 전(M0)에는 빌드·배포를 건너뛴다. #01에서 이 가드를 지운다.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      has_app: ${{ steps.check.outputs.has_app }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ -f package.json ]; then echo "has_app=true" >> "$GITHUB_OUTPUT"
+          else echo "has_app=false" >> "$GITHUB_OUTPUT"; echo "::notice::package.json 없음 (M0). 빌드를 건너뛴다."; fi
+      - if: steps.check.outputs.has_app == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.check.outputs.has_app == 'true'
+        run: npm ci
+      - if: steps.check.outputs.has_app == 'true'
+        run: npm test
+      - if: steps.check.outputs.has_app == 'true'
+        run: npm run build
+      - if: steps.check.outputs.has_app == 'true' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    if: needs.build.outputs.has_app == 'true' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

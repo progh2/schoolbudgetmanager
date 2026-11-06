@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.env*
+!.env.example
+
+# 실제 학교 자료는 절대 커밋하지 않는다. 픽스처는 tests/fixtures/ 가상 데이터만.
+*.xlsx
+*.xls
+*.csv
+*.hwp
+*.hwpx
+*.pdf
+*.yesan.zip
+!tests/fixtures/**
