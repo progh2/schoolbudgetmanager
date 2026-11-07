@@ -42,36 +42,23 @@ src/
 ## 3. Repository 계약
 
 ```ts
-interface CrudRepo<T extends Entity> {
-  list(query?: Query<T>): Promise<T[]>   // 없으면 [] (null 금지). 기본은 deletedAt 없는 것만
-  get(id: string): Promise<T | null>
-  put(entity: T): Promise<T>              // 생성·수정 공용. updatedAt은 어댑터가 찍는다
-  softDelete(id: string, reason: string): Promise<void>
-}
-
 interface Repository {
   readonly kind: 'memory' | 'local' | 'desktop' | 'firebase'
-  fiscalYears: CrudRepo<FiscalYear>
-  departments: CrudRepo<Department>
-  projects: CrudRepo<Project>
-  allocations: CrudRepo<Allocation>
-  items: CrudRepo<BudgetItem>
-  executions: CrudRepo<Execution>
-  evidences: CrudRepo<Evidence>
-  revisions: CrudRepo<Revision>
-  uploadBatches: CrudRepo<UploadBatch>
-  mappingProfiles: CrudRepo<MappingProfile>
-  audit: { append(e: AuditEntry): Promise<void>; list(q: AuditQuery): Promise<AuditEntry[]> }
-  files: { save(blob: Blob, meta: FileMeta): Promise<string>; read(id: string): Promise<Blob | null>; remove(id: string): Promise<void> }
-  /** 여러 쓰기를 하나로. 업로드 반영·변경안 확정은 반드시 이걸 거친다 */
+  list<K extends TableName>(table: K): Promise<Tables[K][]>   // 없으면 [] (null 금지). 지운 것 포함
+  get<K extends TableName>(table: K, id: string): Promise<Tables[K] | null>
+  /** 쓰기의 유일한 입구. 전부 쓰이거나 하나도 안 쓰인다 */
   transact(writes: Write[]): Promise<void>
+  loadAll(): Promise<Data>
+  replaceAll(data: Data, files: StoredFile[]): Promise<void>   // 백업 가져오기 전용
+  files: { save, read, list, remove }
 }
 ```
 
 - 모든 메서드는 Promise. IndexedDB도 Firestore도 비동기라 처음부터 맞춘다
 - 어댑터 선택은 `app/boot.ts`의 `createRepository()` 한 곳
-- **계약 테스트**: `contract.test.ts`가 memory·local 어댑터에 같은 시나리오를 돌린다(빈 목록이 `[]`, soft delete 뒤 목록에서 빠짐, transact 중간 실패 시 아무것도 안 써짐). 새 어댑터는 이 테스트를 통과해야 들어온다
-- **쓰기는 한 곳으로**: 배정·집행 쓰기는 `domain/commands.ts`의 함수(검증 + 감사 기록 + transact)만 한다. 화면·스토어에서 `repo.allocations.put`을 직접 부르지 않는다(`imports.test.ts`가 grep으로 막는다)
+- **계약 테스트**: `storage/contract.test.ts`가 memory·local 어댑터에 같은 시나리오를 돌린다(빈 목록이 `[]`, soft delete한 행도 `get`으로 읽힘, transact 중간 실패 시 아무것도 안 써짐, 소수 금액 거부). 새 어댑터는 이 테스트를 통과해야 들어온다
+- **쓰기는 한 곳으로**: 도메인 명령(`domain/commands.ts` 등)은 순수 함수 `(data, input, ctx) → { writes } | 실패`다. 검증과 감사 기록이 여기서 만들어진다. 스토어의 `run()`만 `repo.transact`를 부르고(`imports.test.ts`가 grep으로 고정), 성공하면 메모리 스냅샷에 반영한다
+- 1년치(집행 1만 행) 규모라 앱은 시작할 때 전부 메모리에 올리고 계산한다. 소프트 삭제(`deletedAt`)로 지우고, 목록·계산은 `live()`로 거른다
 
 ## 4. 데이터 모델
 

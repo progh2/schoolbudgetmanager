@@ -4,13 +4,13 @@
 Vite + React + TypeScript. 기획 `docs/PRD.md`, 구조 `docs/ARCHITECTURE.md`, 이슈 `docs/issues/`.
 
 ## 컨텍스트 앵커
-- intent: M0 — BizCoder 초안(v0.1)을 PRD v0.2로 다시 씀. 코드 없음
-- next_steps: GitHub 저장소 만들기 → `scripts/push-issues.sh` → #01 프로젝트 초기화부터
+- intent: M1 기본 장부 완료(#01~#07). 다음 M2 에듀파인 업로드
+- next_steps: #08 엑셀 읽기부터. 게이트: npm test, npm run build(경고 0), npm run smoke
 
 ## 절차 (반드시)
 1. 새 일은 **이슈부터**(한국어). 원격 전에는 `docs/issues/NN-*.md` + `STATUS.md`.
 2. **브랜치 → PR → 스쿼시 머지.** main 직접 커밋 금지. 브랜치 이름 `feat/NN-짧은설명`.
-3. 머지 전 `npm test`와 `npm run build` 둘 다 통과, 경고 0.
+3. 머지 전 `npm test`, `npm run build`(경고 0), `npm run smoke` 모두 통과.
 4. 머지 후 `docs/PROCESS.md`에 **왜 그렇게 했는지** 한 단락(이슈 번호 붙여).
 5. 커밋: `feat(영역): 한국어 요약 (#번호)`. 영역은 domain·storage·import·backup·ui·infra·docs.
 

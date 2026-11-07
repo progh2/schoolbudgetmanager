@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer components {
+  .input {
+    @apply rounded border border-stone-300 bg-white px-2 py-1.5 text-sm focus:border-emerald-700 focus:outline-none;
+  }
+  .tbl {
+    @apply w-full border-collapse text-sm;
+  }
+  .tbl th {
+    @apply border-b border-stone-300 bg-stone-100 px-2 py-1.5 text-left font-medium whitespace-nowrap;
+  }
+  .tbl td {
+    @apply border-b border-stone-200 px-2 py-1.5 align-top;
+  }
+  .tbl .num {
+    @apply text-right tabular-nums whitespace-nowrap;
+  }
+}
+
+body {
+  font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  word-break: keep-all;
+}
