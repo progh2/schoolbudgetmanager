@@ -61,3 +61,26 @@ export async function scenario(page, base, shot, full) {
   if (!zip.suggestedFilename().endsWith(".yesan.zip")) throw new Error("백업 파일 이름이 이상해요");
   await expect(page.getByText("마지막 백업 오늘")).toBeVisible();
 }
+
+// 에듀파인 업로드: 미리보기 검산 → 반영 → 같은 파일 다시 올리면 전부 '이미 있음'
+export async function uploadScenario(page, base, shot) {
+  await page.goto(`${base}#/upload`);
+  const input = page.locator('input[type=file]').first();
+  await input.setInputFiles("tests/fixtures/edufine-cp949.csv");
+  await expect(page.getByText("글자 인코딩: CP949")).toBeVisible();
+  await page.getByRole("button", { name: "미리보기" }).click();
+  await expect(page.getByText(/읽은 행 6 = 신규 1 \+ 이미 있음 0 \+ 짝 없음 4 \+ 제외 1 ✓/)).toBeVisible();
+  await page.screenshot({ path: `${shot}-upload-preview.png`, fullPage: true });
+  await page.getByRole("button", { name: "5건 반영하기" }).click();
+  await page.getByRole("button", { name: "반영", exact: true }).click();
+  await expect(page.getByText(/5건을 반영했어요/)).toBeVisible();
+
+  await input.setInputFiles("tests/fixtures/edufine-cp949.csv");
+  await expect(page.getByText(/같은 파일을 .*올린 적이 있어요/)).toBeVisible();
+  await page.getByRole("button", { name: "미리보기" }).click();
+  await expect(page.getByRole("button", { name: "이미 있음 5" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "0건 반영하기" })).toBeDisabled();
+
+  await page.goto(`${base}#/executions`);
+  await expect(page.getByText("항목에 연결하지 않은 집행이 4건 있어요")).toBeVisible();
+}

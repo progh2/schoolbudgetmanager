@@ -8,6 +8,19 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   base: "./",
   plugins: [react(), tailwindcss()],
+  build: {
+    rolldownOptions: {
+      output: {
+        // 라이브러리를 앱 코드와 떼어 두면 앱만 바뀐 배포에서 브라우저 캐시를 다시 쓴다
+        codeSplitting: {
+          groups: [
+            { name: "react", test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
+            { name: "vendor", test: /node_modules[\\/](zod|dexie|zustand|fflate)[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: "node",
     include: ["src/**/*.test.{ts,tsx}"],
