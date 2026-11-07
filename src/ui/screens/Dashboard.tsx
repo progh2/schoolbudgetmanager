@@ -14,6 +14,7 @@ export function Dashboard() {
   const total = sums.reduce((s, x) => s + x.budget, 0);
   const spent = sums.reduce((s, x) => s + x.spent, 0);
   const executed = sums.some((s) => s.executed);
+  const unclassifiedSum = idx.unclassified.filter((e) => e.date >= fy.start && e.date <= fy.end).reduce((s, e) => s + e.amount, 0);
   const deptName = new Map(data.departments.map((d) => [d.id, d.name]));
   const depts = departmentRows(idx, fy.id).sort((a, b) => (deptName.get(a.departmentId) ?? "").localeCompare(deptName.get(b.departmentId) ?? "", "ko"));
 
@@ -31,7 +32,10 @@ export function Dashboard() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end gap-6 rounded border border-stone-200 bg-white p-4">
         <div><div className="text-sm text-stone-500">총 예산 ({projects.length}개 사업)</div><div className="text-2xl font-bold"><Won n={total} /></div></div>
-        <div><div className="text-sm text-stone-500">집행</div><div className="text-2xl font-bold"><Won n={spent} /></div></div>
+        <div>
+          <div className="text-sm text-stone-500">집행</div><div className="text-2xl font-bold"><Won n={spent} /></div>
+          {unclassifiedSum !== 0 && <div className="text-xs text-amber-700">미분류 <Won n={unclassifiedSum} /> 빠짐</div>}
+        </div>
         <div><div className="text-sm text-stone-500">잔액</div><div className="text-2xl font-bold"><Won n={total - spent} /></div></div>
         <div><div className="text-sm text-stone-500">집행률 (집행 ÷ 총 예산)</div><div className="text-2xl font-bold"><Rate rate={total > 0 ? spent / total : null} executed={executed} emptyLabel="예산 없음" /></div></div>
         <span className="flex-1" />

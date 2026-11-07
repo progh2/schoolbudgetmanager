@@ -3,7 +3,7 @@
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { serve } from "./serve.mjs";
-import { evidenceScenario, scenario, uploadScenario } from "./scenario.mjs";
+import { dashboardScenario, evidenceScenario, scenario, uploadScenario } from "./scenario.mjs";
 
 const OUT = "test-results/smoke";
 await mkdir(OUT, { recursive: true });
@@ -23,6 +23,7 @@ for (const [prefix, port] of [["/schoolbudgetmanager/", 4317], ["/", 4318]]) {
     if (prefix === "/") {
       await uploadScenario(page, base, shot);
       await evidenceScenario(page, base, shot);
+      await dashboardScenario(page, base, shot);
     }
     if (errors.length) throw new Error(`콘솔 오류: ${errors.join(" | ")}`);
     console.log(`ok   ${base}`);

@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { autoBackupOnOpen, getDir, writeBackup } from "../../app/autoBackup";
 import { useFiscalYear, useStore } from "../../state/store";
 import { daysBetween } from "../../domain/dates";
 import { realCtx } from "../../domain/ctx";
@@ -24,6 +25,30 @@ function BackupBadge() {
     <a href="#/settings" className={`text-xs ${days >= 7 ? "font-semibold text-amber-700" : "text-stone-500"}`}>
       마지막 백업 {days === 0 ? "오늘" : `${days}일 전`}
     </a>
+  );
+}
+
+/** 앱을 열 때 자동 백업. 폴더 권한이 풀렸으면 한 번 눌러 다시 허락받는다(브라우저가 클릭 없이는 묻지 못한다) */
+function AutoBackupNudge() {
+  const [state, setState] = useState<"idle" | "need" | "saved" | "error">("idle");
+  useEffect(() => {
+    autoBackupOnOpen().then((r) => setState(r === "need_permission" ? "need" : r === "saved" ? "saved" : "idle")).catch(() => setState("error"));
+  }, []);
+  if (state === "idle") return null;
+  if (state === "saved") return null;
+  if (state === "error")
+    return <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">자동 백업 폴더에 쓰지 못했어요. <a className="underline" href="#/settings">설정</a>에서 폴더를 다시 골라 주세요.</div>;
+  return (
+    <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+      오늘 자동 백업을 하려면 폴더 쓰기를 다시 허락해 주세요.{" "}
+      <button type="button" className="underline" onClick={async () => {
+        const dir = await getDir();
+        if (dir && (await (dir as unknown as { requestPermission(o: object): Promise<string> }).requestPermission({ mode: "readwrite" })) === "granted") {
+          await writeBackup(dir as Parameters<typeof writeBackup>[0]);
+          setState("saved");
+        }
+      }}>허락하고 백업</button>
+    </div>
   );
 }
 
@@ -59,6 +84,7 @@ export function Layout({ route, children }: { route: string; children: ReactNode
           <nav className="flex flex-wrap gap-1 md:hidden">
             {NAV.map((n) => <a key={n.path} href={`#/${n.path}`} className="rounded border px-2 py-1 text-xs">{n.label}</a>)}
           </nav>
+          <AutoBackupNudge />
           {persisted === false && (
             <div className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
               이 브라우저가 저장 공간 유지를 허락하지 않았어요. 공간이 부족하면 데이터가 지워질 수 있으니 백업을 자주 내보내 주세요.

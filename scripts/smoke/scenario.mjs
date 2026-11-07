@@ -112,3 +112,12 @@ export async function evidenceScenario(page, base, shot) {
   await expect(page.getByRole("cell", { name: "4월 강사수당" })).toBeVisible();
   await page.screenshot({ path: `${shot}-evidence.png`, fullPage: true });
 }
+
+// 대시보드 경고: 근거까지 보이는지
+export async function dashboardScenario(page, base, shot) {
+  await page.goto(`${base}#/`);
+  await expect(page.getByText(/강사수당 한도 초과 1,400,000원/)).toBeVisible();
+  await expect(page.getByText(/한도 5,000,000원 · 집행 6,400,000원/)).toBeVisible();
+  await expect(page.getByText(/미분류 집행/)).toBeVisible();
+  await page.screenshot({ path: `${shot}-dashboard-widgets.png`, fullPage: true });
+}
