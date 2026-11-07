@@ -4,8 +4,8 @@
 Vite + React + TypeScript. 기획 `docs/PRD.md`, 구조 `docs/ARCHITECTURE.md`, 이슈 `docs/issues/`.
 
 ## 컨텍스트 앵커
-- intent: M1·M2 완료(#01~#11). 다음 M3 증빙
-- next_steps: #12 증빙 첨부부터. 게이트: npm test, npm run build(경고 0), npm run smoke
+- intent: M1~M3 완료(#01~#14). 다음 M4 점검·대시보드
+- next_steps: #15 점검부터. 게이트: npm test, npm run build(경고 0), npm run smoke
 
 ## 절차 (반드시)
 1. 새 일은 **이슈부터**(한국어). 원격 전에는 `docs/issues/NN-*.md` + `STATUS.md`.

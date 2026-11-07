@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 
+// .mjs는 일부러 넣지 않는다: 모르는 확장자를 octet-stream으로 보내는 호스팅을 흉내 낸다
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" };
 
 export function serve(root, prefix, port) {

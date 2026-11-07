@@ -84,3 +84,31 @@ export async function uploadScenario(page, base, shot) {
   await page.goto(`${base}#/executions`);
   await expect(page.getByText("항목에 연결하지 않은 집행이 4건 있어요")).toBeVisible();
 }
+
+// 규정 검색(HWPX·PDF, pdf.js 워커가 실제로 뜨는지)과 증빙 첨부·보완 필요
+export async function evidenceScenario(page, base, shot) {
+  await page.goto(`${base}#/projects`);
+  await page.getByRole("link", { name: "방과후학교 운영" }).click();
+  await page.locator('label:has-text("규정 문서 첨부") input[type=file]').setInputFiles(["tests/fixtures/regulation.hwpx", "tests/fixtures/regulation.pdf"]);
+  await expect(page.getByRole("button", { name: "regulation.pdf" })).toBeVisible();
+  await page.getByPlaceholder("규정에서 찾기").fill("강사 수당");
+  await page.getByRole("button", { name: "찾기" }).click();
+  await expect(page.locator("mark", { hasText: "강사수당" }).first()).toBeVisible();
+  await page.getByPlaceholder("규정에서 찾기").fill("instructor fee");
+  await page.getByRole("button", { name: "찾기" }).click();
+  await expect(page.locator("mark", { hasText: "Instructor fee" })).toBeVisible();
+
+  await page.goto(`${base}#/evidence`);
+  await page.getByRole("button", { name: "전체" }).click();
+  await page.getByRole("cell", { name: "4월 강사수당" }).click();
+  await page.getByLabel("증빙 유형").selectOption("resolution");
+  await page.locator('label:has-text("파일 붙이기") input[type=file]').setInputFiles("tests/fixtures/regulation.pdf");
+  await expect(page.getByText("1개를 지출결의서로 붙였어요.")).toBeVisible();
+  await page.locator("table").first().getByRole("button", { name: "보완 필요" }).click();
+  await page.getByPlaceholder("보완할 내용").fill("교장 결재 도장 누락");
+  await page.getByRole("button", { name: "보완 필요로" }).click();
+  await expect(page.getByText("교장 결재 도장 누락")).toBeVisible();
+  await page.locator("section").getByRole("button", { name: "보완 필요", exact: true }).click(); // 필터 탭
+  await expect(page.getByRole("cell", { name: "4월 강사수당" })).toBeVisible();
+  await page.screenshot({ path: `${shot}-evidence.png`, fullPage: true });
+}
