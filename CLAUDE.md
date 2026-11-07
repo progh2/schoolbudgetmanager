@@ -4,8 +4,8 @@
 Vite + React + TypeScript. 기획 `docs/PRD.md`, 구조 `docs/ARCHITECTURE.md`, 이슈 `docs/issues/`.
 
 ## 컨텍스트 앵커
-- intent: M1~M4 완료(#01~#17). 다음 M5 계획 변경·추경
-- next_steps: #18 변경안부터. 게이트: npm test, npm run build(경고 0), npm run smoke
+- intent: M1~M5 완료(#01~#19) = 1단계 전체. M6·M7은 마스터 확인 후
+- next_steps: GitHub 저장소 만들고 push → Settings→Pages→GitHub Actions → scripts/push-issues.sh. 실제 에듀파인 엑셀로 매핑 확인
 
 ## 절차 (반드시)
 1. 새 일은 **이슈부터**(한국어). 원격 전에는 `docs/issues/NN-*.md` + `STATUS.md`.

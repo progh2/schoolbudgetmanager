@@ -69,6 +69,7 @@ function ProjectHeader({ p, setFlash }: { p: Project; setFlash: Flash }) {
           {p.memo && <span className="text-sm text-stone-500">{p.memo}</span>}
           <span className="flex-1" />
           {p.status !== "closed" && <Button onClick={() => setEdit(true)}>정보 고치기</Button>}
+          {p.status === "operating" && <a href="#/revisions" className="rounded border border-stone-300 bg-white px-3 py-1.5 text-sm hover:bg-stone-100">변경안·추경</a>}
           {allowedProjectActions(p.status).map((a) => (
             <Button key={a} kind={a === "close" ? "danger" : "default"} onClick={() => setAsking(a)}>{PROJECT_ACTION_LABEL[a]}</Button>
           ))}

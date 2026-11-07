@@ -6,7 +6,7 @@ import { Section } from "./ui";
 const ACTION: Record<string, string> = {
   create: "만듦", update: "고침", delete: "지움", restore: "되돌림", regulations: "규정 첨부 변경",
   "status:start": "운영 시작", "status:close": "마감", "status:reopen": "다시 열기",
-  "revision:submit": "변경안 제출", "revision:confirm": "변경안 확정", "revision:reject": "변경안 반려", "revision:cancel": "변경안 취소",
+  "revision:submit": "제출", "revision:confirm": "확정", "revision:reject": "반려", "revision:cancel": "취소", "revision:withdraw": "작성 중으로 되돌림",
   "upload:apply": "업로드 반영", "upload:revert": "업로드 되돌림", review: "증빙 검토", assign: "항목 연결",
 };
 const ENTITY: Record<string, string> = {

@@ -121,3 +121,34 @@ export async function dashboardScenario(page, base, shot) {
   await expect(page.getByText(/미분류 집행/)).toBeVisible();
   await page.screenshot({ path: `${shot}-dashboard-widgets.png`, fullPage: true });
 }
+
+// 추경: 작성 → 검증(감액으로 잔액 음수 막힘) → 제출 → 확정(승인 기록) → 금액 반영 → 확정 직전 숫자
+export async function revisionScenario(page, base, shot) {
+  await page.goto(`${base}#/revisions`);
+  await page.locator("select").filter({ hasText: "사업 고르기" }).selectOption({ label: "방과후학교 운영" });
+  await page.getByLabel("추경(총액 증감)").check();
+  await page.getByRole("button", { name: "변경안 만들기" }).click();
+  await page.getByPlaceholder(/2차 추경/).fill("교육청 증액 교부(가상 공문 123호)");
+  // 강사수당은 이미 6,400,000원을 썼다 — 한도를 6,000,000으로 두면 막혀야 한다
+  await page.getByLabel("사업 총액 변경 후").fill("12000000");
+  await page.getByLabel("정보교육부 변경 후").fill("8000000");
+  await page.getByLabel("강사수당 변경 후").fill("6000000");
+  await expect(page.getByText(/이미 6,400,000원을 썼어요/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "제출" })).toBeDisabled();
+  await page.getByLabel("강사수당 변경 후").fill("7000000");
+  await expect(page.getByText("검증 통과: 3곳이 바뀌어요.")).toBeVisible();
+  await page.getByRole("button", { name: "제출" }).click();
+  await expect(page.getByText("제출했어요.")).toBeVisible();
+  await page.getByRole("button", { name: "확정" }).click();
+  await page.getByPlaceholder("예: 학교장").fill("학교장");
+  await page.getByRole("button", { name: "확정" }).last().click();
+  await expect(page.getByRole("heading", { name: /1차 추경/ })).toBeVisible();
+  await page.getByRole("button", { name: "확정 직전 숫자 보기" }).click();
+  await expect(page.getByRole("columnheader", { name: "확정 직전" })).toBeVisible();
+  await page.screenshot({ path: `${shot}-revision.png`, fullPage: true });
+
+  await page.goto(`${base}#/`);
+  await expect(page.getByText("12,000,000원").first()).toBeVisible();
+  // 강사수당 한도 7,000,000 > 집행 6,400,000 → 한도 초과 경고가 사라지고 90% 경고로
+  await expect(page.getByText(/강사수당 한도 90% 이상 사용/)).toBeVisible();
+}

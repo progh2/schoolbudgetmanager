@@ -40,7 +40,7 @@ export function App() {
   else if (head === "executions") screen = <Executions />;
   else if (head === "upload") screen = <Upload />;
   else if (head === "evidence") screen = <EvidenceScreen />;
-  else if (head === "revisions") screen = <Revisions />;
+  else if (head === "revisions") screen = <Revisions openId={id} />;
   else if (head === "settings") screen = <Settings />;
   else screen = <Dashboard />;
   return <Layout route={head}>{screen}</Layout>;
